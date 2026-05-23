@@ -14,17 +14,13 @@ public class UE5G_TestAssignment : ModuleRules
 			"InputCore", 
 			"EnhancedInput",
 			"UMG", // UI
-			"Slate",
-			"SlateCore",
-			"LevelSequence", // Cinematic
-			"MovieScene", 
-			"MovieSceneTracks"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] { });
-
-		// Uncomment if you are using Slate UI
-		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
+		PrivateDependencyModuleNames.AddRange(new string[]
+		{
+			"Slate", // UI
+			"SlateCore",
+		});
 		
 		// Uncomment if you are using online features
 		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
