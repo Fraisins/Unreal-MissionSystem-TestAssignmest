@@ -28,9 +28,6 @@ public:
 	/** Activates object indicator with objective he should represent */
 	void Activate(UMissionObjective* Objective);
 	
-	/** Trigger indicator to remove immediately */
-	void ForceRemove();
-	
 	// ---- PARENT ----
 	
 	/** Set an actor indicator will be attached to */

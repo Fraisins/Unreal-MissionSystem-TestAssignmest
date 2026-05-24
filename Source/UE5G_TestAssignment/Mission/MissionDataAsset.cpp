@@ -14,7 +14,7 @@ EDataValidationResult UMissionDataAsset::IsDataValid(class FDataValidationContex
 	if (MissionPublicName.IsEmpty())
 	{
 		Context.AddError(FText::FromString(FString::Printf(
-			TEXT("[UMissionDataAsset] Error: Mission '%s' doesn't have a public naFe!"), 
+			TEXT("[UMissionDataAsset] Error: Mission '%s' doesn't have a public name!"), 
 			*GetName())));
 		Result = EDataValidationResult::Invalid;
 	}
@@ -29,7 +29,7 @@ EDataValidationResult UMissionDataAsset::IsDataValid(class FDataValidationContex
 		Result = EDataValidationResult::Invalid;
 	}
 	// check objectives in for loop
-	for (int8 i = 0; i < MissionObjectives.Num(); ++i)
+	for (uint8 i = 0; i < MissionObjectives.Num(); ++i)
 	{
 		const UMissionObjective* Objective = MissionObjectives[i];
 		
@@ -39,6 +39,7 @@ EDataValidationResult UMissionDataAsset::IsDataValid(class FDataValidationContex
 			TEXT("[UMissionDataAsset] Error: Mission '%s' has null objective at index [%d]!"), 
 			*GetName(), i)));
 			Result = EDataValidationResult::Invalid;
+			continue; // otherwise will try to check null
 		}
 		Result = Objective->IsDataValid(Context);
 	}

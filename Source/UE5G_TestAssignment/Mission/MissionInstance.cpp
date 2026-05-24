@@ -141,8 +141,11 @@ bool UMissionInstance::ActivateNextObjective()
 
 bool UMissionInstance::IsMissionComplete() const
 {
+	UMissionObjective* CurrentObjective = GetCurrentObjective();
+	if (!CurrentObjective)  // validation in data asset shouldn't theoretically allow this
+		return false;		// but i decided to add it just in case
 	return CurrentObjectiveIndex == RuntimeObjectives.Num() - 1 // is last mission?
-		&& GetCurrentObjective()->GetState() == EMissionState::Completed; // is last objective completed?
+		&& CurrentObjective->GetState() == EMissionState::Completed; // is last objective completed?
 }
 
 void UMissionInstance::CheckAndProgressMission()
