@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Test assignment - Fraisins 2026
 
 #pragma once
 
@@ -33,9 +33,6 @@ public:
 	
 protected:
 	virtual void NativeConstruct() override;
-	
-	// for easier click on the widget
-	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	
 	UPROPERTY(BlueprintReadOnly, meta=(BindWidget))
 	UEditableText* DigitInput;

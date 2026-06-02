@@ -22,14 +22,15 @@ void UMissionPointReachObjective::ActivateObjective()
 	
 	if (!Trigger) // fail if trigger is null
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[MissionPointReachObjective]: Error - TargetTrigger is null or not loaded!"));
+		UE_LOG(LogMissions, Warning, TEXT("[MissionPointReachObjective]: Error - TargetTrigger is null or not loaded!"));
 		FailObjective();
 		return;
 	}
 	
 	// just cache this so GetObjectiveLocation() won't cast every time
 	CachedTargetTrigger = Trigger;
-	CachedTargetTrigger->OnActorEnterTrigger.AddDynamic(this, &UMissionPointReachObjective::OnColliderTriggered); // sub
+	CachedTargetTrigger->OnActorEnterTrigger.AddDynamic(this, &UMissionPointReachObjective::OnColliderTriggered);
+	CachedTargetTrigger->TryActivateTrigger();
 }
 
 void UMissionPointReachObjective::DeactivateObjective()
@@ -37,6 +38,7 @@ void UMissionPointReachObjective::DeactivateObjective()
 	if (CachedTargetTrigger)
 	{
 		CachedTargetTrigger->OnActorEnterTrigger.RemoveDynamic(this, &UMissionPointReachObjective::OnColliderTriggered);
+		CachedTargetTrigger->TryDisableTrigger();
 	}
 	
 	Super::DeactivateObjective();

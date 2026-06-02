@@ -20,8 +20,8 @@ bool UMissionSubsystem::StartMission(UMissionDataAsset* MissionData)
 	const FName MissionID = MissionData->MissionID;
 	
 	// Missions handle their own state - subsystem subscribes to catch mission changes and broadcast own delegates
-	NewMission->OnMissionStateChanged.AddDynamic(this, &UMissionSubsystem::OnMissionStateChanged);
-	NewMission->OnCurrentObjectiveChanged.AddDynamic(this, &UMissionSubsystem::OnMissionObjectiveChanged);
+	NewMission->OnMissionStateChanged.AddUObject(this, &UMissionSubsystem::OnMissionStateChanged);
+	NewMission->OnCurrentObjectiveChanged.AddUObject(this, &UMissionSubsystem::OnMissionObjectiveChanged);
 	
 	ActiveMissions.Add(MissionID, NewMission);
 	NewMission->ActivateMission();
@@ -65,8 +65,8 @@ bool UMissionSubsystem::DeactivateMission(FName MissionID)
 	
 	UMissionInstance* Mission = ActiveMissions[MissionID];
 	
-	Mission->OnMissionStateChanged.RemoveDynamic(this, &UMissionSubsystem::OnMissionStateChanged);
-	Mission->OnCurrentObjectiveChanged.RemoveDynamic(this, &UMissionSubsystem::OnMissionObjectiveChanged);
+	Mission->OnMissionStateChanged.RemoveAll(this);
+	Mission->OnCurrentObjectiveChanged.RemoveAll(this);
 	
 	ActiveMissions.Remove(MissionID);
 	
@@ -92,7 +92,6 @@ void UMissionSubsystem::OnMissionStateChanged(UMissionInstance* MissionInstance,
 
 void UMissionSubsystem::OnMissionObjectiveChanged(UMissionInstance* MissionInstance, UMissionObjective* NewObjective)
 {
-	UE_LOG(LogTemp, Log, TEXT("OnMissionObjectiveChanged triggered in Subsystem"));
 	FName MissionID = MissionInstance->GetMissionId();
 	
 	if (NewObjective)
@@ -100,7 +99,7 @@ void UMissionSubsystem::OnMissionObjectiveChanged(UMissionInstance* MissionInsta
 		AActor* ObjectiveTarget = NewObjective->GetActorTarget();
 		if (!IsValid(ObjectiveTarget))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("ObjectiveTarget is invalid for mission %s"), 
+			UE_LOG(LogMissions, Warning, TEXT("ObjectiveTarget is invalid for mission %s"), 
 				*MissionInstance->GetMissionId().ToString());
 		}
 		else

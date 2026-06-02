@@ -8,13 +8,14 @@
 #include "UObject/Object.h"
 #include "MissionInstance.generated.h"
 
+class UMissionInstance;
 class UMissionDataAsset;
 class UMissionObjective;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnMissionStateChanged, UMissionInstance*, MissionInstance, 
-	EMissionState, State);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnCurrentObjectiveChanged, UMissionInstance*, MissionInstance, 
-	UMissionObjective*, Objective);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnMissionStateChanged, UMissionInstance* MissionInstance, 
+	EMissionState State);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnCurrentObjectiveChanged, UMissionInstance* MissionInstance, 
+	UMissionObjective* Objective);
 
 /**
  * Runtime instance of a mission created from UMissionDataAsset.
@@ -49,49 +50,43 @@ public:
 	
 	// ---- DELEGATES ----
 	
-	UPROPERTY(BlueprintAssignable, Category = "Mission|Delegates")
 	FOnMissionStateChanged OnMissionStateChanged;
-	
-	UPROPERTY(BlueprintAssignable, Category = "Mission|Delegates")
 	FOnCurrentObjectiveChanged OnCurrentObjectiveChanged;
 	
 	// ---- GETTERS ----
 	
-	/** Get Source Data Asset of this mission  */
-	UFUNCTION(BlueprintPure, Category="Mission|Getters")
-	const UMissionDataAsset* GetSourceAsset() const { return SourceAsset; }
-	
 	/** Get all runtime mission objectives  */
 	UFUNCTION(BlueprintPure, Category="Mission|Getters")
-	const TArray<UMissionObjective*>& GetRuntimeObjectives() const { return RuntimeObjectives; }
+	FORCEINLINE TArray<UMissionObjective*> GetRuntimeObjectives() const { return RuntimeObjectives; }
 	
-	/** Get current objective  */
 	UFUNCTION(BlueprintPure, Category = "Mission|Getters")
-	UMissionObjective* GetCurrentObjective() const { return RuntimeObjectives[CurrentObjectiveIndex]; }
+	FORCEINLINE UMissionObjective* GetCurrentObjective() const { 
+		return RuntimeObjectives.IsValidIndex(CurrentObjectiveIndex) 
+		? RuntimeObjectives[CurrentObjectiveIndex] 
+		: nullptr; }
 	
-	/** Get current mission state  */
 	UFUNCTION(BlueprintPure, Category = "Mission|Getters")
-	EMissionState GetMissionState() const { return MissionState; }
+	FORCEINLINE EMissionState GetMissionState() const { return MissionState; }
 	
-	/** Get mission ID  */
 	UFUNCTION(BlueprintPure, Category = "Mission|Getters")
-	FName GetMissionId() const;
+	FORCEINLINE FName GetMissionId() const { return SourceAsset ?
+		SourceAsset->MissionID :
+		FName(""); }
 	
 	/** Get mission FText name (FOR UI) */
 	UFUNCTION(BlueprintPure, Category = "Mission|Getters")
-	FText GetMissionPublicName() const { return SourceAsset ? 
+	FORCEINLINE FText GetMissionPublicName() const { return SourceAsset ? 
 		SourceAsset->MissionPublicName : 
 		FText::GetEmpty(); }
 	
 	/** Get mission description from its current objective */
 	UFUNCTION(BlueprintPure, Category = "Mission|Getters")
-	FText GetMissionDescription() const { return GetCurrentObjective() ? 
+	FORCEINLINE FText GetMissionDescription() const { return GetCurrentObjective() ? 
 		GetCurrentObjective()->GetDescription() : 
 		FText::GetEmpty(); }
 	
-	/** Get mission indicator class (taken from UMissionDataAsset) */
 	UFUNCTION(BlueprintPure, Category = "Mission|Getters")
-	TSubclassOf<AObjectiveIndicator> GetObjectiveIndicatorClass() const { return SourceAsset ? 
+	FORCEINLINE TSubclassOf<AObjectiveIndicator> GetObjectiveIndicatorClass() const { return SourceAsset ? 
 		SourceAsset->ObjectiveIndicatorClass : 
 		nullptr; }
 	

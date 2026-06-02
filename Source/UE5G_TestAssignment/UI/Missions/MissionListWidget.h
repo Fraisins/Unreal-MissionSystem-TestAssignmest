@@ -23,6 +23,7 @@ class UE5G_TESTASSIGNMENT_API UMissionListWidget : public UUserWidget
 	// ---- BASE FUNCTIONS ----
 	
 protected:
+	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 	

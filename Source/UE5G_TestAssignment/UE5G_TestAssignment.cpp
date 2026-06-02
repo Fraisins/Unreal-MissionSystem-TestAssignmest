@@ -4,3 +4,4 @@
 #include "Modules/ModuleManager.h"
 
 IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, UE5G_TestAssignment, "UE5G_TestAssignment" );
+DEFINE_LOG_CATEGORY(LogUI);

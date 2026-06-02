@@ -7,9 +7,11 @@
 #include "UObject/Object.h"
 #include "MissionObjective.generated.h"
 
+class UMissionObjective;
 class AObjectiveIndicator;
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnObjectiveStateChanged, UMissionObjective*, Objective,
-                                             EMissionState, NewState);
+
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnObjectiveStateChanged, UMissionObjective* Objective,
+                                             EMissionState NewState);
 
 /**
  * Single mission objective, responsible for handling it's own progress.
@@ -34,25 +36,23 @@ public:
 	 * Normally called internally when mission encountered error, or any objective failed. */
 	virtual void ForceFail();
 	
-	/** Fired when objective state is changed */
-	UPROPERTY(BlueprintAssignable, Category = "Mission|Delegates")
 	FOnObjectiveStateChanged OnObjectiveStateChanged;
 	
 	// ---- GETTERS ----
 	
 	/** Get current objective state */
 	UFUNCTION(BlueprintPure, Category="Mission|Getters")
-	EMissionState GetState() const { return State; }
+	FORCEINLINE EMissionState GetState() const { return State; }
 	
-	/** Get mission description */
+	/** Get mission description 
+	 * Can be edited in child classes */
 	UFUNCTION(BlueprintPure, Category="Mission|Getters")
 	virtual FText GetDescription() const { return Description; }
 	
 	/** Get target actor if have one (otherwise nullptr)
 	 * Used for attaching objective indicator on targets */
 	UFUNCTION(BlueprintPure, Category="Mission|Getters")
-	virtual AActor* GetActorTarget() const
-		{ return nullptr; }
+	virtual AActor* GetActorTarget() const { return nullptr; }
 	
 	// ---- VALIDATE (for children) ----
 	

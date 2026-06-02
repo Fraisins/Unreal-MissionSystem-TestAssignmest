@@ -4,15 +4,20 @@
 #include "MissionListWidget.h"
 #include "MissionEntryWidget.h"
 #include "Components/VerticalBox.h"
+#include "UE5G_TestAssignment/UE5G_TestAssignment.h"
 #include "UE5G_TestAssignment/Mission/MissionSubsystem.h"
 
 // ---- BASIC FUNCTIONS ----
 
-void UMissionListWidget::NativeConstruct()
+void UMissionListWidget::NativeOnInitialized()
 {
-	if (!ensureAlwaysMsgf(MissionEntryClass != nullptr,
-		TEXT("[UMissionListWidget] Error - MissionEntryClass is NOT assigned in Blueprint!")))
+	Super::NativeOnInitialized();
+	
+	if (!MissionEntryClass)
+	{
+		UE_LOG(LogUI, Error, TEXT("[UMissionListWidget] Error - MissionEntryClass is NOT assigned in Blueprint!"));
 		return;
+	}
 	
 	// get subsystem
 	MissionSubsystem = GetGameInstance()->GetSubsystem<UMissionSubsystem>();
@@ -33,7 +38,7 @@ void UMissionListWidget::NativeConstruct()
 		(GetOwningPlayer(), MissionEntryClass);
 		
 		if (!Entry){
-			UE_LOG(LogTemp, Error, TEXT("[UMissionsHUDWidget] Error - Failed to create UMissionEntryWidget"));
+			UE_LOG(LogUI, Error, TEXT("[UMissionsHUDWidget] Error - Failed to create UMissionEntryWidget"));
 			return;
 		}
 		
@@ -42,17 +47,25 @@ void UMissionListWidget::NativeConstruct()
 		if (i != MaxEntryCount - 1)
 			Entry->SetPadding(FMargin(0.0f, 0.0f, 0.0f, MissionsEntryPaddingBottom));
 	}
+}
+
+void UMissionListWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
 	
-	TArray<FName> MissionKeys;
-	MissionSubsystem->GetActiveMissions().GetKeys(MissionKeys);
-	
-	// give missions if already loaded
-	for (int i = 0; i < FMath::Min(MaxEntryCount, MissionKeys.Num()); i++)
+	if (MissionSubsystem)
 	{
-		IDArrayOrder.Add(MissionKeys[i]);
-	}
+		TArray<FName> MissionKeys;
+		MissionSubsystem->GetActiveMissions().GetKeys(MissionKeys);
 	
-	UpdateEntries();
+		// give missions if already loaded
+		for (int i = 0; i < FMath::Min(MaxEntryCount, MissionKeys.Num()); i++)
+		{
+			IDArrayOrder.Add(MissionKeys[i]);
+		}
+	
+		UpdateEntries();	
+	}
 }
 
 void UMissionListWidget::NativeDestruct()

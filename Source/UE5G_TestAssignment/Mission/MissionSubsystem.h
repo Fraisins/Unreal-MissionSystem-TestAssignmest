@@ -57,7 +57,7 @@ public:
 	
 	/** Returns the mission instance for the given ID, or nullptr if not active. */
 	UFUNCTION(BlueprintPure, Category="Missions|Getters")
-	UMissionInstance* GetMissionInstance(FName MissionID) const
+	FORCEINLINE UMissionInstance* GetMissionInstance(FName MissionID) const
 		{ return ActiveMissions.Contains(MissionID) ? ActiveMissions[MissionID] : nullptr; }
 	
 	// ---- DELEGATES ----

@@ -3,7 +3,8 @@
 
 #include "CodeMiniGame.h"
 #include "Blueprint/UserWidget.h"
-#include "UE5G_TestAssignment/Player/MainPlayerController.h"
+#include "UE5G_TestAssignment/UE5G_TestAssignment.h"
+#include "UE5G_TestAssignment/Player/PlayerHUD.h"
 #include "UE5G_TestAssignment/UI/CodeMiniGame/PasswordWidget.h"
 
 
@@ -52,20 +53,22 @@ void ACodeMiniGame::StartWidgetMiniGame(AActor* InteractingActor)
 	if (!InteractingActor) return;
 	
 	// get controller
-	AMainPlayerController* PC = AMainPlayerController::GetMainPlayerControllerFromActor(InteractingActor);
-	if (!PC) return;
+	APlayerHUD* PlayerHUD = APlayerHUD::GetPlayerHUDFromActor(InteractingActor);
+	if (!PlayerHUD) return;
 	
-	ActivePasswordWidget = CreateWidget<UPasswordWidget>(PC, PasswordWidgetClass);
-	if (!PasswordWidgetClass)
+	
+	
+	ActivePasswordWidget = CreateWidget<UPasswordWidget>(PlayerHUD->GetOwningPlayerController(), PasswordWidgetClass);
+	if (!ActivePasswordWidget)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[ACodeMiniGame] Error - %s failed to create MiniGameWidget"),
+		UE_LOG(LogUI, Warning, TEXT("[ACodeMiniGame] Error - %s failed to create MiniGameWidget"),
 			*GetNameSafe(this));
 		return;
 	}
 	
-	ActivePasswordWidget->OnPasswordWrong.AddDynamic(this, &ACodeMiniGame::MiniGameFailed);
-	ActivePasswordWidget->OnPasswordCorrect.AddDynamic(this, &ACodeMiniGame::MiniGameComplete);
-	PC->AddMiniGameToScreen(ActivePasswordWidget);
+	ActivePasswordWidget->OnPasswordWrong.AddUObject(this, &ACodeMiniGame::MiniGameFailed);
+	ActivePasswordWidget->OnPasswordCorrect.AddUObject(this, &ACodeMiniGame::MiniGameComplete);
+	PlayerHUD->AddMiniGameToScreen(ActivePasswordWidget);
 	
 	CurrentInteractingActor = InteractingActor;
 	OnStartInteract.Broadcast(TScriptInterface<IInteractable>(this), CurrentInteractingActor);
@@ -85,12 +88,12 @@ void ACodeMiniGame::MiniGameComplete()
 
 void ACodeMiniGame::RemovePasswordWidget()
 {
-	AMainPlayerController* PC = AMainPlayerController::GetMainPlayerControllerFromActor(CurrentInteractingActor);
-	if (!PC) return;
-	PC->RemoveCurrentMiniGameFromScreen();
+	APlayerHUD* PlayerHUD = APlayerHUD::GetPlayerHUDFromActor(CurrentInteractingActor);
+	if (!PlayerHUD) return;
+	PlayerHUD->RemoveCurrentMiniGameFromScreen();
 	
-	ActivePasswordWidget->OnPasswordWrong.RemoveDynamic(this, &ACodeMiniGame::MiniGameFailed);
-	ActivePasswordWidget->OnPasswordCorrect.RemoveDynamic(this, &ACodeMiniGame::MiniGameComplete);
+	ActivePasswordWidget->OnPasswordWrong.RemoveAll(this);
+	ActivePasswordWidget->OnPasswordCorrect.RemoveAll(this);
 	
 	ActivePasswordWidget = nullptr;
 }

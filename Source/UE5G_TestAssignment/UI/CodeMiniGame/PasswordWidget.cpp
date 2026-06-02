@@ -1,20 +1,102 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Test assignment - Fraisins 2026
 
 
 #include "PasswordWidget.h"
-
 #include "PasswordDigit.h"
+#include "Components/HorizontalBox.h"
 #include "Components/TextBlock.h"
+
+#if WITH_EDITOR
+#include "WidgetBlueprint.h"
+#include "Blueprint/WidgetBlueprintGeneratedClass.h"
+#include "Blueprint/WidgetTree.h"
+#include "Components/HorizontalBoxSlot.h"
+#include "Kismet2/BlueprintEditorUtils.h"
+#endif
+
+
+void UPasswordWidget::NativeOnInitialized()
+{
+	Super::NativeOnInitialized();
+	
+	if (HorizontalBox && HorizontalBox->GetChildrenCount() > 0)
+		InitializeDigits();
+}
 
 void UPasswordWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 	
 	TextBlock->SetText(LabelText);
+	FocusPasswordDigit(0);
+}
+
+// ---- GENERATION ----
+
+void UPasswordWidget::GenerateDigitWidgets()
+{
+#if WITH_EDITOR
+	if (!DigitClass || !HorizontalBox || !WidgetTree) return;
 	
-	Digits = { Digit1, Digit2, Digit3, Digit4 };
+	UWidgetBlueprintGeneratedClass* WidgetBlueprintGeneratedClass = Cast<UWidgetBlueprintGeneratedClass>(GetClass());
 	
-	for (int8 i = 0; i < Digits.Num(); i++)
+	UPackage* Package = WidgetBlueprintGeneratedClass->GetPackage();
+	UWidgetBlueprint* MainAsset = Cast<UWidgetBlueprint>(Package->FindAssetInPackage());
+	
+	UHorizontalBox* AssetHorizontalBox = Cast<UHorizontalBox>(
+		MainAsset->WidgetTree->FindWidget("HorizontalBox"));
+	if (!AssetHorizontalBox) return;
+	
+	// clear previous digits
+	TArray<UWidget*> Children = AssetHorizontalBox->GetAllChildren();
+	for (UWidget* Child : Children)
+	{
+		Child->Modify();
+		MainAsset->WidgetTree->RemoveWidget(Child);
+	}
+	AssetHorizontalBox->ClearChildren();
+
+    // generate new digits
+    for (uint8 i = 0; i < MaxDigitsAmount; i++)
+    {
+        UPasswordDigit* Digit = MainAsset->WidgetTree->ConstructWidget<UPasswordDigit>(
+        	DigitClass, 
+        	FName(*FString::Printf(TEXT("PasswordDigit_%d"), i)));
+        if (!Digit) continue;
+		
+        UPanelSlot* PanelSlot = AssetHorizontalBox->AddChild(Digit);
+        UHorizontalBoxSlot* HorizontalSlot = Cast<UHorizontalBoxSlot>(PanelSlot);
+        if (!HorizontalSlot) continue;
+
+    	HorizontalSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+        HorizontalSlot->SetHorizontalAlignment(HAlign_Fill);
+        HorizontalSlot->SetVerticalAlignment(VAlign_Fill);
+
+    	if (i < MaxDigitsAmount - 1)
+    		HorizontalSlot->SetPadding(FMargin(0.f, 0.f, HorizontalPadding, 0.f));
+    	else
+    		HorizontalSlot->SetPadding(FMargin(0.f));
+    }
+	
+	AssetHorizontalBox->Modify();
+	MainAsset->Modify();
+	
+	FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(MainAsset);
+#endif
+}
+
+void UPasswordWidget::InitializeDigits()
+{
+	// add digits from box to array for easier use
+	Digits.Empty();
+	for (uint8 i = 0; i < HorizontalBox->GetChildrenCount(); i++)
+	{
+		if (UPasswordDigit* Digit = Cast<UPasswordDigit>(HorizontalBox->GetChildAt(i)))
+			Digits.Add(Digit);
+	}
+	
+	// bind to digit's delegate
+	for (uint8 i = 0; i < Digits.Num(); i++)
 	{
 		if (!Digits[i]) continue;
 		
@@ -26,9 +108,6 @@ void UPasswordWidget::NativeConstruct()
 				SubmitDigits();
 		});
 	}
-	
-	FocusPasswordDigit(0);
-	
 }
 
 FString UPasswordWidget::GetEnteredPassword() const

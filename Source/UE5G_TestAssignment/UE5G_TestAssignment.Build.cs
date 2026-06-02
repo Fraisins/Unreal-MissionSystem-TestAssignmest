@@ -15,16 +15,14 @@ public class UE5G_TestAssignment : ModuleRules
 			"EnhancedInput",
 			"UMG", // UI
 		});
-
-		PrivateDependencyModuleNames.AddRange(new string[]
-		{
-			"Slate", // UI
-			"SlateCore",
-		});
 		
-		// Uncomment if you are using online features
-		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
-
-		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
+		if (Target.bBuildEditor)
+		{
+			PrivateDependencyModuleNames.AddRange(new string[] 
+			{
+				"UMGEditor",
+				"UnrealEd" 
+			});
+		}
 	}
 }

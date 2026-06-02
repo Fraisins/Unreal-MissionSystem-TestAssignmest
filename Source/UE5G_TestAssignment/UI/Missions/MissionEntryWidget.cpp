@@ -2,7 +2,6 @@
 
 
 #include "MissionEntryWidget.h"
-
 #include "Components/TextBlock.h"
 #include "UE5G_TestAssignment/Mission/MissionInstance.h"
 

@@ -20,7 +20,9 @@ void UMissionInteractiveObjectObjective::ActivateObjective()
 	
 	if (GetState() == EMissionState::Completed)
 	{
-		UE_LOG(LogTemp, Error, TEXT("[BUG] Objective %s woke up already COMPLETED! Force resetting..."), *GetName());
+		UE_LOG(LogMissions, Error, 
+			TEXT("[UMissionInteractiveObjectObjective] BUG - Objective %s woke up already COMPLETED! Force resetting."), 
+			*GetName());
 		// Force reset state here if possible
 	}
 	
@@ -28,7 +30,7 @@ void UMissionInteractiveObjectObjective::ActivateObjective()
 	
 	if (!ActorGet) // fail if null
 	{
-		UE_LOG(LogTemp, Warning, 
+		UE_LOG(LogMissions, Warning, 
 			TEXT("[UMissionInteractiveObjectObjective]: Error - InteractableActor is null or not loaded!"));
 		FailObjective();
 		return;
@@ -38,7 +40,7 @@ void UMissionInteractiveObjectObjective::ActivateObjective()
 		
 	if (!Interactable)
 	{
-		UE_LOG(LogTemp, Warning, 
+		UE_LOG(LogMissions, Warning, 
 			TEXT("[UMissionInteractiveObject]: Error - InteractableActor is not IInteractable!"));
 		FailObjective();
 		return;

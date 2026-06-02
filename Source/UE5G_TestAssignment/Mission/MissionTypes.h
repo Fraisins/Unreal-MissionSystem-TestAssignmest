@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "MissionTypes.generated.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogMissions, Log, All);
+
 /**
  * Mission and objective state
  */

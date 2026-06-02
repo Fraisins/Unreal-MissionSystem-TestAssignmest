@@ -2,7 +2,6 @@
 
 
 #include "MissionInstance.h"
-
 #include "MissionDataAsset.h"
 #include "MissionObjective.h"
 
@@ -12,7 +11,7 @@ bool UMissionInstance::Initialize(const UMissionDataAsset* InSourceAsset)
 {
 	if (!InSourceAsset)
 	{
-		UE_LOG(LogTemp, Error, TEXT("[UMissionInstance] failed to initialize : InSourceAsset is null!"));
+		UE_LOG(LogMissions, Error, TEXT("[UMissionInstance] failed to initialize : InSourceAsset is null!"));
 		return false;
 	}
 	
@@ -75,15 +74,6 @@ void UMissionInstance::ForceFail()
 	FailMission();
 }
 
-// ---- GETTERS ----
-
-FName UMissionInstance::GetMissionId() const
-{
-	return SourceAsset ?
-		SourceAsset->MissionID :
-		FName("");
-}
-
 // ---- STATE ----
 
 void UMissionInstance::ChangeMissionState(EMissionState NewState)
@@ -102,13 +92,11 @@ void UMissionInstance::OnObjectiveStateChanged(UMissionObjective* Objective, EMi
 	switch (NewState)
 	{
 	case EMissionState::Failed:
-		Objective->OnObjectiveStateChanged.RemoveDynamic(
-			this, &UMissionInstance::OnObjectiveStateChanged);
+		Objective->OnObjectiveStateChanged.RemoveAll(this);
 		FailMission();
 		return;
 	case EMissionState::Completed:
-		Objective->OnObjectiveStateChanged.RemoveDynamic(
-			this, &UMissionInstance::OnObjectiveStateChanged);
+		Objective->OnObjectiveStateChanged.RemoveAll(this);
 		CheckAndProgressMission();
 		return;
 	default:
@@ -128,11 +116,11 @@ bool UMissionInstance::ActivateNextObjective()
 	
 	if (!Objective) // null check
 	{
-		UE_LOG(LogTemp, Error, TEXT("[UMissionInstance] Trying to activate null objective!"));
+		UE_LOG(LogMissions, Error, TEXT("[UMissionInstance] Trying to activate null objective!"));
 		return false;
 	}
-	Objective->OnObjectiveStateChanged.AddDynamic(this, &UMissionInstance::OnObjectiveStateChanged); // sub
-	Objective->ActivateObjective(); // activate
+	Objective->OnObjectiveStateChanged.AddUObject(this, &UMissionInstance::OnObjectiveStateChanged);
+	Objective->ActivateObjective();
 	
 	OnCurrentObjectiveChanged.Broadcast(this, Objective); // broadcast after activation
 	

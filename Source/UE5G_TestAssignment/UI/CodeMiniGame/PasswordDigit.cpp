@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Test assignment - Fraisins 2026
 
 
 #include "PasswordDigit.h"
@@ -14,14 +14,6 @@ void UPasswordDigit::NativeConstruct()
 			DigitInput->SetIsReadOnly(true);
 		DigitInput->OnTextChanged.AddDynamic(this, &UPasswordDigit::OnTextChanged);
 	}
-}
-
-FReply UPasswordDigit::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
-{
-	if (DigitInput)
-		DigitInput->SetKeyboardFocus();
-    
-	return FReply::Handled();
 }
 
 void UPasswordDigit::SetFocused(bool bFocused)

@@ -62,7 +62,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 			&APlayerCharacter::Interact);
 	}
 	else
-		UE_LOG(LogTemp, Error, TEXT("[PlayerCharacter] Bind actions failed: UEnhancedInputComponent not found on %s"), 
+		UE_LOG(LogInput, Error, TEXT("[PlayerCharacter] Bind actions failed: UEnhancedInputComponent not found on %s"), 
 			*GetNameSafe(this));
 }
 
@@ -121,9 +121,13 @@ void APlayerCharacter::Interact()
 	//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 2.0f, 0, 2.0f);
 	if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, Params))
 	{
+		AActor* HitActor = Hit.GetActor();
+		if (!HitActor) return;
+		
 		//DrawDebugSphere(GetWorld(), Hit.Location, 10.0f, 8, FColor::Green, false, 2.0f);
-		UE_LOG(LogTemp, Log, TEXT("Interact: Hit: %s"), *Hit.GetActor()->GetName());
-		if (Hit.GetActor()->Implements<UInteractable>())
+		// UE_LOG(LogTemp, Log, TEXT("Interact: Hit: %s"), *Hit.GetActor()->GetName());
+		
+		if (HitActor->Implements<UInteractable>())
 		{
 			IInteractable::Execute_Interact(Hit.GetActor(), this);
 		}

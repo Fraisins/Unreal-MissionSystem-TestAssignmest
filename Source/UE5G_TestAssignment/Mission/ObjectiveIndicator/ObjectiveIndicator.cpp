@@ -36,7 +36,7 @@ void AObjectiveIndicator::BeginPlay()
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("[%s] Error - WidgetClass is null"), *GetNameSafe(this));
+		UE_LOG(LogMissions, Error, TEXT("[%s] Error - WidgetClass is null"), *GetNameSafe(this));
 	}
 }
 
@@ -46,13 +46,13 @@ void AObjectiveIndicator::Activate(UMissionObjective* Objective)
 {
 	if (!Objective)
 	{
-		UE_LOG(LogTemp, Error, TEXT("[%s] Trying to activate objective indicator with invalid objective!"),
+		UE_LOG(LogMissions, Error, TEXT("[%s] Trying to activate objective indicator with invalid objective!"),
 			*GetNameSafe(this))
 		return;
 	}
 	
 	CachedObjective = Objective;
-	CachedObjective->OnObjectiveStateChanged.AddDynamic(this, &AObjectiveIndicator::OnObjectiveStateChanged);
+	CachedObjective->OnObjectiveStateChanged.AddUObject(this, &AObjectiveIndicator::OnObjectiveStateChanged);
 }
 
 // ---- OBJECTIVE ----
@@ -62,7 +62,7 @@ void AObjectiveIndicator::ClearFromCurrentObjective()
 	if (!CachedObjective.IsValid())
 		return;
 	
-	CachedObjective->OnObjectiveStateChanged.RemoveDynamic(this, &AObjectiveIndicator::OnObjectiveStateChanged);
+	CachedObjective->OnObjectiveStateChanged.RemoveAll(this);
 	CachedObjective = nullptr;
 }
 

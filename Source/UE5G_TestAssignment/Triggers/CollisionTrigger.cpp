@@ -2,10 +2,10 @@
 
 
 #include "CollisionTrigger.h"
-#include "GameplayTagAssetInterface.h"
 #include "Components/ShapeComponent.h"
 
 // ---- BASIC FUNCTIONS ----
+
 void ACollisionTrigger::BeginPlay()
 {
 	Super::BeginPlay();
@@ -13,26 +13,53 @@ void ACollisionTrigger::BeginPlay()
 	UShapeComponent* Collision = GetCollision();
 	if (!Collision)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[%s] Error - GetCollision() Not found a valid Collision!"), 
+		UE_LOG(LogCollision, Warning, TEXT("[%s] Error - GetCollision() Not found a valid Collision!"), 
 			*GetNameSafe(this));
 		return;
 	}
 	
-	Collision->OnComponentBeginOverlap.AddDynamic(this,&ACollisionTrigger::OnOverlapBegin);
+	Collision->OnComponentBeginOverlap.AddDynamic(this, &ACollisionTrigger::OnOverlapBegin);
+	Collision->OnComponentEndOverlap.AddDynamic(this, &ACollisionTrigger::OnOverlapEnd);
+	
+	bEnabledAtStart? TryActivateTrigger() : TryDisableTrigger();
 }
 
 void ACollisionTrigger::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	UShapeComponent* Collision = GetCollision();
-	if (!Collision)
+	if (!IsValid(Collision))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[%s] Error - GetCollision() Not found a valid Collision!"), 
+		UE_LOG(LogCollision, Warning, TEXT("[%s] Error - GetCollision() Not found a valid Collision!"), 
 			*GetNameSafe(this));
 		return;
 	}
 	
-	Collision->OnComponentBeginOverlap.RemoveDynamic(this,&ACollisionTrigger::OnOverlapBegin);
+	Collision->OnComponentBeginOverlap.RemoveDynamic(this, &ACollisionTrigger::OnOverlapBegin);
+	Collision->OnComponentEndOverlap.RemoveDynamic(this, &ACollisionTrigger::OnOverlapEnd);
+	
 	Super::EndPlay(EndPlayReason);
+}
+
+// ---- ENABLE / DISABLE ----
+
+void ACollisionTrigger::TryActivateTrigger()
+{
+	UShapeComponent* Collision = GetCollision();
+	if (!Collision) return;
+	
+	ActivationCount++;
+	if (ActivationCount == 1)
+		Collision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+}
+
+void ACollisionTrigger::TryDisableTrigger()
+{
+	UShapeComponent* Collision = GetCollision();
+	if (!Collision) return;
+	
+	ActivationCount = FMath::Max(ActivationCount - 1, 0);
+	if (ActivationCount == 0)
+		Collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 // ---- OVERLAP ----
